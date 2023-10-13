@@ -1,5 +1,6 @@
 ****4.1 Varying the database size****
-|dataset	    |   no			                             |cache pre    		          | path pref                            |   monitor                                         |
+|dataset	    |   no			                             |cache prefetch	          | path prefetch                        |   monitor   prefetch                              |
+|------------|-------------------------------------|-------------------------|--------------------------------------|---------------------------------------------------|
 |------------|-----------|------------|------------|------------|------------|------------|------------|------------|------------|------------|------------|------------|
 |cold	       |index-time	|total-time	 |throughput  |index-time  |total-time  |throughput	 |index-time	 |total-time	 |throughput	 |index-time	 |total-time	 |throughput  |
 |0.1million	 |2785.683	  |5171.237	   |1933773	    |2516.247	   |4966.924	   |2019746	    |2512.736	   |5017.684	   |2000517	    |2577.269	   |5000.016	   |1992873     |
