@@ -1,4 +1,5 @@
 ****4.1 Varying the database size****
+
 |dataset	    | baseline    |            |            |  CP         |            |            |    PP       |            |            |  MP         |            |            |
 |------------|-------------|------------|------------|-------------|------------|------------|-------------|------------|------------|-------------|------------|------------|
 |cold	       |index-time	  |total-time	 |throughput  |index-time   |total-time  |throughput	 |index-time	  |total-time	 |throughput	 |index-time	  |total-time	 |throughput  |
