@@ -87,6 +87,6 @@ Prefetching indexing scheme experiments
 >[2] Modified files: benchmarks/ycsb.h, bechmarks/ycsb_query.cpp, benchmarks/ycsb_query.h, benchmarks/ycsb_txn.h, benchmarks/ycsb_wl.cpp, concurrency_control/row_hekaton.cpp, concurrency_control/row_hekaton.h storages/row.h, systems/query.cpp, systems/txn.cpp, systems/txn.h  
 
   
-3. Tests and Raw data
+2. Tests and Raw data
 >  /paper-tests.md
     
