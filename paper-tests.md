@@ -1,9 +1,9 @@
 ****4.1 Varying the database size****
-|dataset	   |   no			                      |    cache prefetch			        |    path prefetch			                    |   monitor prefetch    |       |
-|cold	       |index-time	|total-time	 |throughput  |index-time |total-time  |throughput	|index-time	|total-time	|throughput	|index-time	|total-time	|throughput |
-|0.1million	   |2785.683	|5171.237	 |1933773	  |2516.247	  |4966.924	   |2019746	    |2512.736	|5017.684	|2000517	|2577.269	|5000.016	|1992873    |
-|1million	   |4412.655	|7662.321	 |1305087	  |3944.617	  |7343.861	   |1363388	    |3743.551	|7140.488	|1400484	|4033.247	|7363.247	|1360058    |
-|10million	   |7677.967	|10973.232	 |909929	  |6007.799	  |10246.326   |966627	    |5110.469	|9434.413	|1048832	|6636.167	|10154.593  |989835     |
+>|dataset	   |   no			                      |    cache prefetch			        |    path prefetch			                    |   monitor prefetch    |       
+>|cold	       |index-time	|total-time	 |throughput  |index-time |total-time  |throughput	|index-time	|total-time	|throughput	|index-time	|total-time	|throughput |
+>|0.1million	   |2785.683	|5171.237	 |1933773	  |2516.247	  |4966.924	   |2019746	    |2512.736	|5017.684	|2000517	|2577.269	|5000.016	|1992873    |
+>|1million	   |4412.655	|7662.321	 |1305087	  |3944.617	  |7343.861	   |1363388	    |3743.551	|7140.488	|1400484	|4033.247	|7363.247	|1360058    |
+>|10million	   |7677.967	|10973.232	 |909929	  |6007.799	  |10246.326   |966627	    |5110.469	|9434.413	|1048832	|6636.167	|10154.593  |989835     |
 
 |dataset	  |   no			                        |    cache prefetch			            |   path prefetch			              |       monitor prefetch		        |
 |warm	      |index-time	|total-time	|throughput	|index-time	|total-time	|throughput	|index-time	|total-time	|throughput	|index-time	|total-time	|throughput |
