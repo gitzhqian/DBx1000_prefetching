@@ -78,7 +78,7 @@ The following two distributed DBMS testbeds have been developed based on DBx1000
 1. Deneva: https://github.com/mitdbg/deneva
 2. Sundial: https://github.com/yxymit/Sundial
 
-Prefetching experiments and results
+Prefetching indexing scheme experiments
 ----------------------------------
 1. Code
 
