@@ -1,4 +1,4 @@
-4.1 Varying the database size
+**4.1 Varying the database size**
 | Name     | Character |
 | ---      | ---       |
 | Backtick | `         |
