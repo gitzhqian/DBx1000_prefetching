@@ -25,6 +25,7 @@ Query_queue::init(workload * h_wl) {
 #elif WORKLOAD == TPCC
 	assert(tpcc_buffer != NULL);
 #endif
+
 	int64_t begin = get_server_clock();
 	pthread_t p_thds[g_thread_cnt - 1];
 	for (UInt32 i = 0; i < g_thread_cnt - 1; i++) {
@@ -34,6 +35,7 @@ Query_queue::init(workload * h_wl) {
 	for (uint32_t i = 0; i < g_thread_cnt - 1; i++) 
 		pthread_join(p_thds[i], NULL);
 	int64_t end = get_server_clock();
+
 	printf("Query Queue Init Time %f\n", 1.0 * (end - begin) / 1000000000UL);
 }
 

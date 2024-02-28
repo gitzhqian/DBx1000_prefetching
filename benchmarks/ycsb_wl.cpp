@@ -21,7 +21,7 @@ int ycsb_wl::next_tid;
 RC ycsb_wl::init() {
 	workload::init();
 	next_tid = 0;
-    string path = "/home/zhangqian/code/DBx1000_engine_ycsb/DBx1000_engine/benchmarks/YCSB_schema.txt";
+    string path = "/home/zhangqian/code/DBx1000_engine_prefetching/benchmarks/YCSB_schema.txt";
     //string path = "/home/zhangqian/code/DBx1000_engine/benchmarks/YCSB_schema.txt";
     //string path = "/home/zq/DBx1000_engine_ptr/DBx1000_engine/benchmarks/YCSB_schema.txt";
 

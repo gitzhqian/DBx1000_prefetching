@@ -238,7 +238,11 @@ void *txn_man::index_read(INDEX * index, idx_key_t key, int part_id, access_t ty
     }
     INC_TMP_STATS(get_thd_id(), time_index, get_sys_clock() - starttime);
 //#if PATH_PREFETCHING == true
-    history_search_keys.emplace_back(std::make_pair(key, 0));
+//    tbb::concurrent_hash_map<uint64_t, uint64_t>::accessor accessor_tbb;
+//    auto ret = history_search_keys.find(accessor_tbb, key);
+//    if (!ret){
+//        history_search_keys.insert(std::make_pair(key, 0));
+//    }
 //#endif
 
     return item;

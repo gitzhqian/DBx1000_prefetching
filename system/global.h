@@ -22,7 +22,10 @@
 #include <math.h>
 #include <limits>
 #include <queue>
+
+#define TBB_PREVIEW_CONCURRENT_ORDERED_CONTAINERS 1
 #include "tbb/concurrent_hash_map.h"
+#include "tbb/concurrent_set.h"
 
 #include "pthread.h"
 #include "config.h"
@@ -31,6 +34,7 @@
 #ifndef NOGRAPHITE
 #include "carbon_user.h"
 #endif
+
 
 using namespace std;
 
@@ -91,21 +95,23 @@ extern bool g_ts_batch_alloc;
 extern UInt32 g_ts_batch_num;
 
 extern map<string, string> g_params;
-extern std::set<uint64_t> distinct_search_keys;
-extern std::vector<std::pair<uint64_t,uint64_t>> history_search_keys;
+extern tbb::concurrent_set<uint64_t> distinct_search_keys;
+//extern std::vector<std::pair<uint64_t,uint64_t>> history_search_keys;
+//extern tbb::concurrent_hash_map<uint64_t, uint64_t>  history_search_keys;
 extern void *root_node;
 //<itself, neighbor>
 extern tbb::concurrent_hash_map<uint64_t, std::vector<std::pair<void *,void *>>> keys_paths;
-extern std::set<void *> distance_3_paths;
+extern tbb::concurrent_set<void *> distance_3_paths_set;
+extern tbb::concurrent_set<void *> distance_4_paths_set;
+extern tbb::concurrent_set<void *> distance_5_paths_set;
+extern std::map<uint64_t,uint64_t> distance_6_paths_map;
 extern std::vector<void *> distance_4_paths;
 extern std::vector<void *> distance_5_paths;
 extern std::vector<void *> distance_6_paths;
 extern std::vector<void *> distance_6_paths_k;
-extern std::vector<void *> distance_6_paths_;
-extern std::set<void *> distance_4_paths_set;
-extern std::set<void *> distance_5_paths_set;
-extern std::map<uint64_t,uint64_t> distance_6_paths_map;
-extern std::queue<void *> history_requests;
+extern tbb::concurrent_set<void *> distance_6_paths_set;
+
+//extern std::queue<void *> history_requests;
 extern uint64_t total_chain_length;
 
 // YCSB

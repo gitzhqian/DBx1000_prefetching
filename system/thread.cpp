@@ -40,8 +40,6 @@ void PinToCore(size_t core) {
 }
 
 RC thread_t::run() {
-    PinToCore(0);
-
 #if !NOGRAPHITE
 	_thd_id = CarbonGetTileId();
 #endif

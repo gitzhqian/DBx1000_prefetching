@@ -4,6 +4,8 @@
 #ifndef _BTREE_STORE_H_
 #define _BTREE_STORE_H_
 
+
+
 #include <iostream>
 #include <list>
 #include <algorithm>
@@ -766,31 +768,25 @@ public:
             if (!node->IsLeaf()){
                 BaseNode *node_ptr = node;
 
+#if PATH_PREFETCHING == true
                 if (h<2){
-                    distance_3_paths.emplace(reinterpret_cast<void *>(node_ptr));
+                    void *nodeptr = reinterpret_cast<void *>(node_ptr);
+                    distance_3_paths_set.insert(nodeptr);
                 }
                 if (h==2){
                     void *nodeptr = reinterpret_cast<void *>(node_ptr);
-//                    if (std::find(distance_4_paths.begin(),distance_4_paths.end(),nodeptr) == distance_4_paths.end()){
-//                        distance_4_paths.push_back(nodeptr);
-//                    }
-                    distance_4_paths_set.emplace(nodeptr);
+                    distance_4_paths_set.insert(nodeptr);
                 }
                 if (h==3){
                     void *nodeptr = reinterpret_cast<void *>(node_ptr);
-//                    if (std::find(distance_5_paths.begin(),distance_5_paths.end(),nodeptr) ==  distance_5_paths.end()){
-//                        distance_5_paths.push_back(nodeptr);
-//                    }
-                    distance_5_paths_set.emplace(nodeptr);
+                    distance_5_paths_set.insert(nodeptr);
                 }
                 if (h==4){
                     void *nodeptr = reinterpret_cast<void *>(node_ptr);
-//                    if (std::find(distance_6_paths.begin(),distance_6_paths.end(),nodeptr) ==  distance_6_paths.end()){
-//                        distance_6_paths.push_back(nodeptr);
-//                    }
 //                    distance_6_set.emplace(nodeptr);
-                    distance_6_paths_.emplace_back(nodeptr);
+                    distance_6_paths_set.insert(nodeptr);
                 }
+#endif
 
                 BaseNode *node_r_ptr = nullptr;
                 if (meta_index > 1){
@@ -832,32 +828,35 @@ public:
             }
             assert(node);
             if (!node->IsLeaf()){
-                BaseNode *node_ptr = node;
-                if (h<2){
-                    distance_3_paths.emplace(reinterpret_cast<void *>(node_ptr));
-                }
-                if (h==2){
-                    void *nodeptr = reinterpret_cast<void *>(node_ptr);
-                    distance_4_paths_set.emplace(nodeptr);
-                }
-                if (h==3){
-                    void *nodeptr = reinterpret_cast<void *>(node_ptr);
-                    distance_5_paths_set.emplace(nodeptr);
-                }
-                if (h==4){
-                    void *nodeptr = reinterpret_cast<void *>(node_ptr);
-                    distance_6_paths_.emplace_back(nodeptr);
-                }
-
-                BaseNode *node_r_ptr = nullptr;
-                if (meta_index > 1){
-                    node_r = parent->GetChildByMetaIndex(meta_index-1);
-                    if (node_r != nullptr){
-                        node_r_ptr = node_r;
-                    }
-                }
-                key_paths[h] = (std::make_pair(reinterpret_cast<void *>(node_ptr),
-                                               reinterpret_cast<void *>(node_r_ptr)));
+//                BaseNode *node_ptr = node;
+//                if (h<2){
+//                    void *nodeptr = reinterpret_cast<void *>(node_ptr);
+//                    if (std::find(distance_3_paths.begin(),distance_3_paths.end(),nodeptr) == distance_3_paths.end()){
+//                        distance_3_paths.push_back(nodeptr);
+//                    }
+//                }
+//                if (h==2){
+//                    void *nodeptr = reinterpret_cast<void *>(node_ptr);
+//                    distance_4_paths_set.emplace(nodeptr);
+//                }
+//                if (h==3){
+//                    void *nodeptr = reinterpret_cast<void *>(node_ptr);
+//                    distance_5_paths_set.emplace(nodeptr);
+//                }
+//                if (h==4){
+//                    void *nodeptr = reinterpret_cast<void *>(node_ptr);
+//                    distance_6_paths_.emplace_back(nodeptr);
+//                }
+//
+//                BaseNode *node_r_ptr = nullptr;
+//                if (meta_index > 1){
+//                    node_r = parent->GetChildByMetaIndex(meta_index-1);
+//                    if (node_r != nullptr){
+//                        node_r_ptr = node_r;
+//                    }
+//                }
+//                key_paths[h] = (std::make_pair(reinterpret_cast<void *>(node_ptr),
+//                                               reinterpret_cast<void *>(node_r_ptr)));
             }
             h = h+1;
         }
@@ -875,8 +874,7 @@ public:
         for (uint32_t i = 0; i < record_count; ++i) {
             row_t meta = leaf_node->row_meta[i];
             if (meta.IsVisible() && !meta.IsInserting()){
-                __attribute__((unused)) uint64_t key =
-                        *reinterpret_cast<uint64_t *>(meta.primary_key);
+                __attribute__((unused)) uint64_t key = *reinterpret_cast<uint64_t *>(meta.primary_key);
 //                printf("leaf node key:%lu \n", key);
 //                auto ret = table_size.insert(key);
 //            table_size_all.emplace_back(key);
@@ -951,13 +949,13 @@ public:
         std::array<std::pair<void *, void *>,10> ptr_vector = scan_paths[0].second;
         BaseNode *root = this->tree->GetRootNodeSafe();
 #if AHEAD_PREFETCH == true
-        __builtin_prefetch((const void *) (root), 0, 1);
+        __builtin_prefetch((const void *) (root), 0, PREFETCH_LEVEL);
         uint32_t ptr_sz = ptr_vector.size();
         for (int i = 0; i < ptr_sz; ++i) {
             void *node_ = ptr_vector[i].first;
             if(node_ == nullptr) continue;
             for (uint32_t i = 0; i < SPLIT_THRESHOLD / CACHE_LINE_SIZE; ++i) {
-                __builtin_prefetch((const void *)((char *)node_ + i * CACHE_LINE_SIZE), 0, 1);
+                __builtin_prefetch((const void *)((char *)node_ + i * CACHE_LINE_SIZE), 0, PREFETCH_LEVEL);
             }
         }
 #endif
@@ -1011,7 +1009,7 @@ public:
             void *node_ = ptr_vector[i].first;
             if(node_ == nullptr) continue;
             for (uint32_t i = 0; i < SPLIT_THRESHOLD / CACHE_LINE_SIZE; ++i) {
-                __builtin_prefetch((const void *)((char *)node_ + i * CACHE_LINE_SIZE), 0, 1);
+                __builtin_prefetch((const void *)((char *)node_ + i * CACHE_LINE_SIZE), 0, PREFETCH_LEVEL);
             }
         }
 #endif
@@ -1076,7 +1074,7 @@ public:
         uint32_t prefetch_length = sizeof(row_t) * count;
         uint32_t prefetch_count = (prefetch_length / CACHE_LINE_SIZE);
         for (uint32_t i = 0; i < prefetch_count; ++i) {
-            __builtin_prefetch((const void *) ((char *) node + i * CACHE_LINE_SIZE), 0, 1);
+            __builtin_prefetch((const void *) ((char *) node + i * CACHE_LINE_SIZE), 0, PREFETCH_LEVEL);
         }
 #endif
 

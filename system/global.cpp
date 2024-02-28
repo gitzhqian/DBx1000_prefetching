@@ -57,20 +57,21 @@ UInt32 g_field_per_tuple = FIELD_PER_TUPLE;
 UInt32 g_init_parallelism = INIT_PARALLELISM;
 
 std::vector<char *> secondary_keys;
-std::set<uint64_t> distinct_search_keys;
-std::vector<std::pair<uint64_t,uint64_t>> history_search_keys;
+tbb::concurrent_set<uint64_t> distinct_search_keys;
+//std::vector<std::pair<uint64_t,uint64_t>> history_search_keys;
+//tbb::concurrent_hash_map<uint64_t, uint64_t>  history_search_keys;
 void *root_node;
 tbb::concurrent_hash_map<uint64_t, std::vector<std::pair<void *,void *>>> keys_paths;
-std::set<void *> distance_3_paths;
 std::vector<void *> distance_4_paths;
 std::vector<void *> distance_5_paths;
 std::vector<void *> distance_6_paths;
 std::vector<void *> distance_6_paths_k;
-std::vector<void *> distance_6_paths_;
-std::set<void *> distance_4_paths_set;
-std::set<void *> distance_5_paths_set;
+tbb::concurrent_set<void *> distance_6_paths_set;
+tbb::concurrent_set<void *> distance_3_paths_set;
+tbb::concurrent_set<void *> distance_4_paths_set;
+tbb::concurrent_set<void *> distance_5_paths_set;
 std::map<uint64_t,uint64_t> distance_6_paths_map;
-std::queue<void *> history_requests;
+//std::queue<void *> history_requests;
 uint64_t total_chain_length;
 
 

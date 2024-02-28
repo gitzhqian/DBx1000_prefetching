@@ -59,8 +59,8 @@ RC ycsb_txn_man::run_txn(base_query * query) {
         auto fild_count = schema->get_field_cnt();
         std::array<std::pair<void *, void *>,10> ptr_vector = req->paths;
         std::array<std::pair<uint64_t,std::array<std::pair<void *, void *>, 10>>,3> ptr_scan_vector = req->scan_paths;
-        history_requests.push(reinterpret_cast<void *>(req));
-#if JUMP_PREFETCHING
+//        history_requests.push(reinterpret_cast<void *>(req));
+#if JUMP_PREFETCHING_CHAIN
         if (type == RD) {
             distinct_search_keys.insert(req->key);
         }
@@ -108,7 +108,6 @@ RC ycsb_txn_man::run_txn(base_query * query) {
 #elif ENGINE_TYPE == PTR2
             record_pointer = *reinterpret_cast<uint64_t *>(row_data+S1_KEY_SIZE);
 #endif
-
 #else
 ///1.read the index
             if (type == RD || type == RO || type == WR) {

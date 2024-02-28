@@ -8,22 +8,20 @@ class Catalog;
 class txn_man;
 
 // Only a constant number of versions can be maintained.
-// If a request accesses an old version that has been recycled,   
+// If a request accesses an old version that has been recycled,
 // simply abort the request.
 
 #if CC_ALG == HEKATON
 
 struct WriteHisEntry {
-	bool begin_txn;	
+	bool begin_txn;
 	bool end_txn;
 	ts_t begin;
 	ts_t end;
-	row_t * row;
-#if JUMP_PREFETCHING == true
-//	char distance_[4096]; //for test
-    WriteHisEntry *next;
-    WriteHisEntry *jump;
-#endif
+    WriteHisEntry * next ;//points to new
+    WriteHisEntry * pre ; //points to old
+    row_t * row;
+
 };
 
 #define INF UINT64_MAX
@@ -37,6 +35,7 @@ public:
     bool            exists_prewriter(){return _exists_prewrite;}
 
     WriteHisEntry * _write_history; // circular buffer
+    std::vector<WriteHisEntry *> *_jump_queue;
 
     void            *leaf_node;
     char            *update_data;
@@ -44,8 +43,7 @@ public:
 
     uint32_t 		_his_latest;
     WriteHisEntry * his_latest;
-    WriteHisEntry * his_oldest;
-    WriteHisEntry * his_older;
+
     WriteHisEntry * initw(row_t * row);
 
 private:
@@ -58,7 +56,7 @@ private:
 
     volatile bool  	 _exists_prewrite;
 	std::atomic<int> _pre_reader_counter = ATOMIC_VAR_INIT(0);
-	
+
 	uint32_t 		_his_len;
 };
 

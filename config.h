@@ -5,7 +5,7 @@
 /***********************************************/
 // Simulation + Hardware
 /***********************************************/
-#define THREAD_CNT					1
+#define THREAD_CNT					3
 #define PART_CNT					1
 // each transaction only accesses 1 virtual partition.
 //But the lock/ts manager and index are not aware of such partitioning.
@@ -118,17 +118,17 @@
 // max number of rows touched per transaction
 #define MAX_ROW_PER_TXN				1024
 #define QUERY_INTVL 				1UL
-#define MAX_TXN_PER_PART 			(1000*1000)
+#define MAX_TXN_PER_PART 			(1000*1)
 #define FIRST_PART_LOCAL 			true
-#define MAX_TUPLE_SIZE				1024 // in bytes
+#define MAX_TUPLE_SIZE				100 // in bytes
 
 // ==== [YCSB] ====
 #define INIT_PARALLELISM			1
 //#define SYNTH_TABLE_SIZE 			(1024 * 1024 * 10)
-#define SYNTH_TABLE_SIZE 			(1024 * 1024 * 10)
+#define SYNTH_TABLE_SIZE 			(1024 * 1024)
 #define ZIPF_THETA 					0.0
-#define READ_PERC 					1.0
-#define WRITE_PERC 					0.0
+#define READ_PERC 					0.5
+#define WRITE_PERC 					0.5
 #define SCAN_PERC 					0.0
 #define INSERT_PERC                 0.0
 #define SCAN_LEN					30
@@ -233,14 +233,15 @@ extern TestCases					g_test_case;
 #define PTR1                        1
 #define PTR2                        2
 
+#define PREFETCH_LEVEL              3
 #define LEAF_PREFETCH               false
 #define AHEAD_PREFETCH              false
 #define PREFETCHING					false
-#define PATH_PREFETCHING            true
-#define JUMP_PREFETCHING			false
+#define PATH_PREFETCHING            false
+#define JUMP_PREFETCHING			true
+#define JUMP_PREFETCHING_CHAIN      false
 #define JUMP_1			            false
-#define JUMP_2			            false
-#define JUMP_3			            false
+#define JUMP_queue			        true
 #define INSERT_INDIRECT				false
 #define SECONDARY_INDEX             false
 #define KEY_SIZE                     8
@@ -255,7 +256,7 @@ extern TestCases					g_test_case;
 
 //#define ENGINE_TYPE                 PTR0
 //#define ENGINE_TYPE                 PTR1
-#define ENGINE_TYPE                 PTR2
+#define ENGINE_TYPE                   PTR2
 
 //#define DRAM_BLOCK_SIZE             16*1024
 //#define SPLIT_THRESHOLD             1024

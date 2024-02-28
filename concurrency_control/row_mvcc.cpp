@@ -13,8 +13,8 @@ void Row_mvcc::init(row_t * row) {
 	_his_len = 4;
 	_req_len = _his_len;
 
-	_write_history = (WriteHisEntry *) _mm_malloc(sizeof(WriteHisEntry) * _his_len, 64);
-	_requests = (ReqEntry *) _mm_malloc(sizeof(ReqEntry) * _req_len, 64);
+	_write_history = (WriteHisEntry *)_mm_malloc(sizeof(WriteHisEntry) * _his_len, 64);
+	_requests = (ReqEntry *)_mm_malloc(sizeof(ReqEntry) * _req_len, 64);
 	for (uint32_t i = 0; i < _his_len; i++) {
 		_requests[i].valid = false;
 		_write_history[i].valid = false;
@@ -30,7 +30,7 @@ void Row_mvcc::init(row_t * row) {
 	_max_served_rts = 0;
 	
 	blatch = false;
-	latch = (pthread_mutex_t *) _mm_malloc(sizeof(pthread_mutex_t), 64);
+	latch = (pthread_mutex_t *)_mm_malloc(sizeof(pthread_mutex_t), 64);
 	pthread_mutex_init(latch, NULL);
 }
 
@@ -62,7 +62,7 @@ void
 Row_mvcc::double_list(uint32_t list)
 {
 	if (list == 0) {
-		WriteHisEntry * temp = (WriteHisEntry *) _mm_malloc(sizeof(WriteHisEntry) * _his_len * 2, 64);
+		WriteHisEntry * temp = (WriteHisEntry *)_mm_malloc(sizeof(WriteHisEntry) * _his_len * 2, 64);
 		for (uint32_t i = 0; i < _his_len; i++) {
 			temp[i].valid = _write_history[i].valid;
 			temp[i].reserved = _write_history[i].reserved;
@@ -196,8 +196,7 @@ INC_STATS(txn->get_thd_id(), debug3, get_sys_clock() - t2);
 	return rc;
 }
 
-row_t *
-Row_mvcc::reserveRow(ts_t ts, txn_man * txn)
+row_t *Row_mvcc::reserveRow(ts_t ts, txn_man * txn)
 {
 	assert(!_exists_prewrite);
 	
@@ -225,7 +224,7 @@ Row_mvcc::reserveRow(ts_t ts, txn_man * txn)
 			_oldest_wts = max_recycle_ts;
 			for (uint32_t i = 0; i < _his_len; i++) {
 				if (_write_history[i].valid
-					&& _write_history[i].ts <= max_recycle_ts)
+				 && _write_history[i].ts <= max_recycle_ts)
 				{
 					_write_history[i].valid = false;
 					_write_history[i].reserved = false;
@@ -255,13 +254,13 @@ Row_mvcc::reserveRow(ts_t ts, txn_man * txn)
 		for (uint32_t i = 0; i < _his_len; i++) {
 			if (!_write_history[i].valid 
 				&& !_write_history[i].reserved 
-				&& _write_history[i].row != NULL) 
+				 && _write_history[i].row != NULL)
 			{
 				idx = i;
 				break;
 			}
 			else if (!_write_history[i].valid 
-				 	 && !_write_history[i].reserved)
+			      && !_write_history[i].reserved)
 				idx = i;
 		}
 		assert(idx < _his_len);

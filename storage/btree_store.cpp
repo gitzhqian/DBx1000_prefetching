@@ -76,7 +76,7 @@ InternalNode::InternalNode(uint32_t node_size, InternalNode *src_node,
         : BaseNode(false, node_size) {
     M_ASSERT(src_node,"InternalNode src_node is null.");
 #if PREFETCHING
-    __builtin_prefetch((const void *) (src_node), 0, 1);
+    __builtin_prefetch((const void *) (src_node), 0, PREFETCH_LEVEL);
 #endif
     auto padded_key_size = row_m::PadKeyLength(key_size);
 
@@ -264,7 +264,7 @@ bool InternalNode::PrepareForSplit(
         return true;
     }
 #if PREFETCHING
-    __builtin_prefetch((const void *) (parent), 0, 1);
+    __builtin_prefetch((const void *) (parent), 0, PREFETCH_LEVEL);
 #endif
     // Try to freeze the parent node first
     bool frozen_by_me = false;
@@ -1166,7 +1166,7 @@ LeafNode *index_btree_store::TraverseToLeaf(Stack *stack, char * key,
     static const uint32_t kCacheLineSize = 64;
     BaseNode *node = GetRootNodeSafe();
 #if PREFETCHING
-    __builtin_prefetch((const void *) (root), 0, 1);
+    __builtin_prefetch((const void *) (root), 0, PREFETCH_LEVEL);
 #endif
 
     if (stack) {
@@ -1183,7 +1183,7 @@ LeafNode *index_btree_store::TraverseToLeaf(Stack *stack, char * key,
 #if PREFETCHING
         //for (uint32_t i = 0; i < (parent->header.size) / kCacheLineSize; ++i) {
         for (uint32_t i = 0; i < SPLIT_THRESHOLD / kCacheLineSize; ++i) {
-            __builtin_prefetch((const void *)((char *)node + i * kCacheLineSize), 0, 1);
+            __builtin_prefetch((const void *)((char *)node + i * kCacheLineSize), 0, PREFETCH_LEVEL);
         }
 #endif
 
@@ -1200,7 +1200,7 @@ LeafNode *index_btree_store::TraverseToLeaf(Stack *stack, char * key,
     uint32_t prefetch_length = sizeof(row_t) * record_count;
     uint32_t prefetch_count = (prefetch_length / CACHE_LINE_SIZE);
     for (uint32_t i = 0; i < prefetch_count; ++i) {
-        __builtin_prefetch((const void *) ((char *) node + i * CACHE_LINE_SIZE), 0, 1);
+        __builtin_prefetch((const void *) ((char *) node + i * CACHE_LINE_SIZE), 0, PREFETCH_LEVEL);
     }
 #endif
 
@@ -1546,13 +1546,13 @@ RC index_btree_store::index_read(idx_key_t key, void *& item, access_t type,
     ReturnCode retc;
 
 #if AHEAD_PREFETCH == true
-    __builtin_prefetch((const void *) (root), 0, 1);
+    __builtin_prefetch((const void *) (root), 0, PREFETCH_LEVEL);
     uint32_t ptr_sz = ptr_vector.size();
    for (int i = 0; i < ptr_sz; ++i) {
         void *node_ = ptr_vector[i].first;
         if(node_ == nullptr) continue;
         for (uint32_t i = 0; i < SPLIT_THRESHOLD / CACHE_LINE_SIZE; ++i) {
-            __builtin_prefetch((const void *)((char *)node_ + i * CACHE_LINE_SIZE), 0, 1);
+            __builtin_prefetch((const void *)((char *)node_ + i * CACHE_LINE_SIZE), 0, PREFETCH_LEVEL);
         }
     }
 

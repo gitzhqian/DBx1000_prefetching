@@ -87,15 +87,17 @@ int main(int argc, char* argv[])
 		query_queue->init(m_wl);
 	pthread_barrier_init( &warmup_bar, NULL, g_thread_cnt );
 
+//-----------------for prefetching---------------------------------------------------------------
+#if PATH_PREFETCHING == true
     for (auto itr = distance_4_paths_set.begin(); itr != distance_4_paths_set.end(); ++itr) {
         distance_4_paths.emplace_back(*itr);
     }
     for (auto itr = distance_5_paths_set.begin(); itr != distance_5_paths_set.end(); ++itr) {
         distance_5_paths.emplace_back(*itr);
     }
-    printf("distance_6_paths_ size:%lu. \n", distance_6_paths_.size());
-    for (int i = 0; i < distance_6_paths_.size(); ++i) {
-        auto node = distance_6_paths_[i];
+    printf("distance_6_paths_ size:%lu. \n", distance_6_paths_set.size());
+    for (auto itr = distance_6_paths_set.cbegin(); itr != distance_6_paths_set.end(); ++itr) {
+        auto node = *itr;
         if (node == nullptr) continue;
         auto ret = distance_6_paths_map.find(reinterpret_cast<uint64_t>(node));
         if (ret == distance_6_paths_map.end()){
@@ -106,7 +108,6 @@ int main(int argc, char* argv[])
         }
     }
     printf("distance_6_paths_map size:%lu. \n", distance_6_paths_map.size());
-//    std::sort(distance_6_paths_map.begin(), distance_6_paths_map.end(), Greater);
     std::set<int> cnter;
     std::map<int, std::vector<void *>> total_cnter;
     for (auto itr = distance_6_paths_map.begin(); itr != distance_6_paths_map.end(); ++itr) {
@@ -138,6 +139,8 @@ int main(int argc, char* argv[])
 //        printf("total_cnter, access count:%d, node size %zu, \n",counts,nods.size());
     }
     printf("distance_6_paths_k size:%lu. \n", distance_6_paths_k.size());
+#endif
+//-----------------for prefetching---------------------------------------------------------------
 
     printf("query_queue initialized!\n");
 #if CC_ALG == HSTORE
@@ -152,13 +155,6 @@ int main(int argc, char* argv[])
         m_thds[i]->init(i, m_wl);
 	}
     printf("threads initialized!\n");
-
-//#if (PATH_PREFETCHING == true || AHEAD_PREFETCH == true)
-	//generate keys and access paths of the queries
-//	auto ycsb_index =  m_wl->indexes["MAIN_INDEX"];
-//    ycsb_index->GetKeysPaths(all_search_keys, KEY_SIZE,  keys_paths);
-//    printf("search keys' access paths initialized!\n");
-//#endif
 
 	if (WARMUP > 0){
 		printf("WARMUP start!\n");
@@ -202,19 +198,20 @@ int main(int argc, char* argv[])
 	uint32_t pthid = thd_cnt;
     pthread_create(&p_thds[pthid], NULL, monitor, (void *)(uint64_t)pthid);
 #endif
-	int64_t starttime = get_server_clock();
-	for (uint32_t i = 0; i < thd_cnt - 1; i++) {
-		uint64_t vid = i;
-		pthread_create(&p_thds[i], NULL, f, (void *)vid);
-	}
-	f((void *)(thd_cnt - 1));
-	for (uint32_t i = 0; i < thd_cnt - 1; i++)
-		pthread_join(p_thds[i], NULL);
-	int64_t endtime = get_server_clock();
 
-#if PATH_PREFETCHING == true
-    history_search_keys.empty();
-#endif
+    int64_t starttime = get_server_clock();
+    for (uint32_t i = 0; i < thd_cnt - 1; i++) {
+        uint64_t vid = i;
+        pthread_create(&p_thds[i], NULL, f, (void *)vid);
+    }
+    f((void *)(thd_cnt - 1));
+    for (uint32_t i = 0; i < thd_cnt - 1 ; i++)
+        pthread_join(p_thds[i], NULL);
+    int64_t endtime = get_server_clock();
+
+//#if PATH_PREFETCHING == true
+//    history_search_keys.empty();
+//#endif
 
 	if (WORKLOAD != TEST) {
 		printf("PASS! SimTime = %ld\n", endtime - starttime);
@@ -224,7 +221,7 @@ int main(int argc, char* argv[])
 		((TestWorkload *)m_wl)->summarize();
 	}
 
-#if JUMP_PREFETCHING
+#if JUMP_PREFETCHING_CHAIN
     uint64_t key_sz = distinct_search_keys.size();
 	uint64_t total_chain_sz = total_chain_length;
 	uint64_t average = total_chain_sz/key_sz;
@@ -286,20 +283,20 @@ void * f(void * id) {
 //};
 //bool Greater(frequences fr1, frequences fr2){ return fr1.counter > fr2.counter;}
 [[noreturn]] void * monitor(void * id){
-    PinToCore(2);
+//    PinToCore(2);
     // Continue till signal is not false
 //    std::vector<frequences> hist_6;
     uint64_t monitor_flg=0;
     while (true) {
 //        uint64_t starttime = get_sys_clock();
 //        printf("distance 3 size: %lu. \n", distance_3_paths.size());
-        __builtin_prefetch((const void *) (root_node), 0, 1);
-        for (auto dis3 = distance_3_paths.cbegin();  dis3 != distance_3_paths.cend();  ++dis3 ) {
+        __builtin_prefetch((const void *) (root_node), 0, PREFETCH_LEVEL);
+        for (auto dis3 = distance_3_paths_set.cbegin();  dis3 != distance_3_paths_set.cend();  ++dis3 ) {
             void *ptr = *dis3;
             if (ptr == nullptr) continue;
             BaseNode *node_r = reinterpret_cast<BaseNode *>(ptr);
             for (uint32_t i = 0; i < DRAM_BLOCK_SIZE / CACHE_LINE_SIZE; ++i) {
-                __builtin_prefetch((const void *)((char *)node_r + i * CACHE_LINE_SIZE), 0, 1);
+                __builtin_prefetch((const void *)((char *)node_r + i * CACHE_LINE_SIZE), 0, PREFETCH_LEVEL);
             }
         }
 
@@ -314,7 +311,7 @@ void * f(void * id) {
             if (ptr == nullptr) continue;
             BaseNode *node_r = reinterpret_cast<BaseNode *>(ptr);
             for (uint32_t i = 0; i < SPLIT_THRESHOLD / CACHE_LINE_SIZE; ++i) {
-                __builtin_prefetch((const void *)((char *)node_r + i * CACHE_LINE_SIZE), 0, 1);
+                __builtin_prefetch((const void *)((char *)node_r + i * CACHE_LINE_SIZE), 0, PREFETCH_LEVEL);
             }
         }
 //        printf("distance 5 size: %lu. \n", distance_5_paths.size());
@@ -328,7 +325,7 @@ void * f(void * id) {
             if (ptr == nullptr) continue;
             BaseNode *node_r = reinterpret_cast<BaseNode *>(ptr);
             for (uint32_t i = 0; i < SPLIT_THRESHOLD / CACHE_LINE_SIZE; ++i) {
-                __builtin_prefetch((const void *)((char *)node_r + i * CACHE_LINE_SIZE), 0, 1);
+                __builtin_prefetch((const void *)((char *)node_r + i * CACHE_LINE_SIZE), 0, PREFETCH_LEVEL);
             }
         }
 //        printf("distance 6 size: %lu. \n", distance_6_paths.size());
@@ -355,7 +352,7 @@ void * f(void * id) {
             if (ptr == nullptr) continue;
             BaseNode *node_r = reinterpret_cast<BaseNode *>(ptr);
             for (uint32_t i = 0; i < SPLIT_THRESHOLD / CACHE_LINE_SIZE; ++i) {
-                __builtin_prefetch((const void *)((char *)node_r + i * CACHE_LINE_SIZE), 0, 1);
+                __builtin_prefetch((const void *)((char *)node_r + i * CACHE_LINE_SIZE), 0, PREFETCH_LEVEL);
             }
         }
 
